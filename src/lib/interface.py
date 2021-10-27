@@ -49,7 +49,6 @@ class VboxInterface:
 
     @staticmethod
     def createdisk(disk_location, size):
-        print(disk_location)
         try:
             cmd = ["VBoxManage", "createhd",
             "--filename", disk_location,

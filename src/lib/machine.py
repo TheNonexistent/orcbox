@@ -59,7 +59,7 @@ class Machine:
             "cpu": self.cpu,
             "vram": self.vram,
             "network": self.network,
-            "groups": "/"+self.groups
+            "groups": "/"+self.groups if self.groups is not None else self.groups
         }
         interface.createvm(**machine)
         boot_order = [None]*4
