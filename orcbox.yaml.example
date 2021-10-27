@@ -1,14 +1,18 @@
 #If no vdi disk is selected, it will create one and you need to specify a boot image. which is not recommended. By default, disks created by orc will be removed after the machine is turned off. in future an option will be added to preserve it.
-
+#network types: none|null|nat|bridged|intnet|hostonly|
 server1:
     os: "Debian_64"
+    cpu: 1
+    network: "nat"
     memory: 1024
     vram: 128
     disk: "serverimage/debian.vdi"
 server2:
     os: "Ubuntu_64"
+    cpu: 1
+    network: "nat"
     memory: 2048
     vram: 128
     disk:
         size: 80000
-        boot: "serveriso/ubuntu.iso"        
+    boot: "serveriso/ubuntu.iso"        

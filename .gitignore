@@ -1,3 +1,4 @@
 .vscode/
 .orc/
 *.pyc
+orcbox.yml

@@ -1,12 +1,12 @@
 import yaml
 import sys
 
-from lib.printformat import Print
+from lib.printformat import Print, Color
 
 class Parser:
     @staticmethod
     def parse(config_file):
-        Print.info("Loading configuration file: " + config_file + " ...")
+        Print.info("Loading configuration file: " + Color.paint('purple',config_file) + " ...")
         with open(config_file, "r") as stream:
             try:
                 config = yaml.safe_load(stream)
