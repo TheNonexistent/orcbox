@@ -68,6 +68,11 @@ if command == "up":
     Print.success("Session created.")
     print("Session:", Color.paint('purple', session_name))
     print("Session ID:", Color.paint('purple', session_id))
+    print()
+    Print.info("Starting up machines...")
+    manager.up()
+    print()
+    Print.success("Successfully stared all machines.")
 
 elif command == "down":
     pass

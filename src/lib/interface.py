@@ -14,7 +14,7 @@ def _run(cmd, name):
         Print.error("VirtualBox Manager command did not complete successfully.")
         Print.error("Info:")
         print(cmd)
-        print("status: " + str(ret.returncode), "o: " + ret.stdout.decode('utf-8'), "\n", "e:" + ret.stderr.decode('utf-8'))
+        print("status: " + str(ret.returncode), "o: " + ret.stdout.decode('utf-8'), "\n", "e: " + ret.stderr.decode('utf-8'))
         Print.error("Aborting.")
         sys.exit(6) #TODO: Exit Gracefully
     return ret
@@ -29,7 +29,7 @@ class VboxInterface:
             "--register",
             "--basefolder", base_folder]
             if groups != None:
-                cmd += [" --groups", groups]
+                cmd += ["--groups", groups]
             # Debug Print: print("++", cmd)
             _run(cmd, "VM CREATION")
             cmd = ["VBoxManage", "modifyvm", machine_name,
@@ -135,7 +135,8 @@ class VboxInterface:
     @staticmethod
     def startvm(machine_name):
         try:
-            cmd = ["VBoxHeadless", "--startvm", machine_name]
+            cmd = ["VBoxManage", "startvm", machine_name,
+            "--type", "headless"]
             # Debug Print: print("++", cmd)
             _run(cmd, "VM STARTUP")
         except Exception as e:

@@ -1,6 +1,6 @@
 import sys, os
 
-from lib.printformat import Print
+from lib.printformat import Print, Color
 from lib.interface import VboxInterface as interface
 
 class Machine:
@@ -59,7 +59,7 @@ class Machine:
             "cpu": self.cpu,
             "vram": self.vram,
             "network": self.network,
-            "groups": self.groups
+            "groups": "/"+self.groups
         }
         interface.createvm(**machine)
         boot_order = [None]*4
@@ -77,3 +77,6 @@ class Machine:
         
         interface.connectdisk(self.vbox_name, self.disk['location'])
         interface.setbootorder(self.vbox_name, *boot_order)
+
+    def start_machine(self):
+        interface.startvm(self.vbox_name)

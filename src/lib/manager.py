@@ -2,7 +2,7 @@ import string
 import random
 
 from lib.machine import Machine
-from lib.printformat import Print
+from lib.printformat import Print, Color
 
 
 _SESSION_ID_LENGTH = 10
@@ -32,7 +32,11 @@ class OrcManager:
             Print.success("\nSession Manager has been successfully set up.")
 
 
-    def up(self,):
+    def up(self):
+        ##TODO: implement functionallity so that if one machine is down the up command just brings up that one
+        for machine in self._machine_list:
+            machine.start_machine()
+            print("-Started: " + Color.paint("lblue", machine.name))
         pass
 
     def down(self,):
