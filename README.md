@@ -1,6 +1,6 @@
 # OrcBox
- OrcBox is a Virtual Machine/Infrastructure Orchestration Tool Written In Python. (Intended for testing and development purposes only.)
- Orchestration coding is done in the YAML format.
+OrcBox is a Virtual Machine/Infrastructure Configuration And Setup Tool nterfacing With VirtualBox and Written In Python. (Intended for testing and development purposes only.)
+ Configuration coding is done in the YAML format.
  OrcBox uses VboxManage as an interface for now but this should be changed in the future.
  
  Alpha commands are:
