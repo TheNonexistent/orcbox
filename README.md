@@ -6,7 +6,8 @@ OrcBox is a Virtual Machine/Infrastructure Configuration And Setup Tool nterfaci
  Alpha commands are:
  - up : bring the machines up
  - status : check the status of the machines
- - down : bringe the machines down and delete them
+ - down : if up, bringe the machines down
+ - purge : if up, bringe the machines down and delete them
  
  More commands will be added.
  
@@ -51,3 +52,4 @@ Any feedback or contribution is welcome.
 - [ ] add copy_disk flag in configuration to allow disk file copying and multiple machines using the same starting disk.
 - [ ] implement functionallity so that if one machine is down the up command just brings up that one
 - [ ] cloning functionallity so cluster nodes can be defined once and then cloned
+- [ ] provide a way to handle this: if an explicit disk is mentioned. it will not be deleted on purge thus if user wants to create a disk and preserve it they should provide a path(for the non existing disk) for the disk to be created and saved there.
