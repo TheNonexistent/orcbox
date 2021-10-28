@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 import argparse
 import sys, os
+import json
 
 from pprint import pprint
 
-from lib.printformat import Colors, Color, Print
 from lib.parser import Parser
 from lib.manager import OrcManager
+
+from lib.system.printformat import Colors, Color, Print
+from lib.system.utils import uprint_status, uprint_line
 
 
 ORC_VERSION = "0.1 Alpha"
 ORC_YAML_VERSION = "1.2.2"
-ORC_AVAILABLE_COMMANDS = ["up", "down", "status"] ## + ["start", "stop", "netstat", "ssh", "monitor"(eg.: docker stats),  ...]
+ORC_AVAILABLE_COMMANDS = ["up", "down", "status"] ## + ["start", "stop", "netstat", "ssh", "monitor"(eg.: docker stats),  "log"(cast vbox log), "inspect"...]
 ORC_DEFAULT_SESSION_DIRECTORY = ".orcbox"
 
 ##Argparse Configuration
@@ -42,20 +45,22 @@ command = args.Command
 
 Print.success("OrcBox Started.")
 
-config_file = args.file
-config = Parser.parse(config_file)
-
-##TODO: Check if configuration File Exists / If open_seasson, read from cached config file
+if not open_session:
+    config_file = args.file
+    config = Parser.parse_config(config_file)
+else:
+    session_file = ORC_DEFAULT_SESSION_DIRECTORY+"/.session"
+    config = Parser.parse_session(session_file)
 
 if command == "up":
     if open_session:
         print()
         Print.info("Session already running.")
-        sys.exit(0)
+        sys.exit(0) #TODO: bring up downed machines here.
     Print.info("Following machines detected: ")
-    print("="*12)
+    uprint_line(15)
     pprint(config)
-    print("="*12)
+    uprint_line(15)
     Print.info("Bringin up detected machines...")
     Print.info("Setting up Session Manager...")
     session_name = os.getcwd().split('/')[-1]
@@ -70,11 +75,23 @@ if command == "up":
     print("Session ID:", Color.paint('purple', session_id))
     print()
     Print.info("Starting up machines...")
-    manager.up()
+    session_machines = manager.up()
     print()
     Print.success("Successfully stared all machines.")
-
+    with open(ORC_DEFAULT_SESSION_DIRECTORY+"/.session", 'w') as session_file:
+        session_file.write(json.dumps(session_machines))
+    Print.success("Session saved.")
 elif command == "down":
     pass
 elif command == "status":
-    pass
+    base_folder = os.getcwd() + "/" + ORC_DEFAULT_SESSION_DIRECTORY + "/data/"
+    manager = OrcManager(session_name, config, base_folder,session_id, open_session=True)
+    machines_stats = manager.status()
+    print()
+
+    uprint_line(20)
+    uprint_status(machines_stats)
+    uprint_line(20)
+
+
+    

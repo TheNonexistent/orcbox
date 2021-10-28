@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-from lib.printformat import Print
+from lib.system.printformat import Print
 
 # TODO: These Should be piped to a log later...
 STDOUT = subprocess.DEVNULL
@@ -21,10 +21,11 @@ def _run(cmd, name):
 
 class VboxInterface:
     @staticmethod
-    def createvm(machine_name, os_type, base_folder, memory, cpu, vram, network, groups):
+    def createvm(machine_name, uuid, os_type, base_folder, memory, cpu, vram, network, groups):
         try:
             cmd = ["VBoxManage", "createvm",
             "--name", machine_name,
+            "--uuid", uuid,
             "--ostype", os_type,
             "--register",
             "--basefolder", base_folder]
@@ -32,7 +33,7 @@ class VboxInterface:
                 cmd += ["--groups", groups]
             # Debug Print: print("++", cmd)
             _run(cmd, "VM CREATION")
-            cmd = ["VBoxManage", "modifyvm", machine_name,
+            cmd = ["VBoxManage", "modifyvm", uuid,
             "--ioapic", "on",
             "--cpus", str(cpu),
             "--memory", str(memory),
@@ -40,7 +41,7 @@ class VboxInterface:
             "--nic1", network]
             # Debug Print: print("++", cmd)
             _run(cmd, "VM CREATION")
-            Print.info(f"-- Created vm: {machine_name}, os_type: {os_type}, base_folder: {base_folder}, memory: {memory}, cpu: {cpu}, vram: {vram}, network: {network}, groups: {groups}")
+            Print.info(f"-- Created vm: {machine_name}:{uuid}, os_type: {os_type}, base_folder: {base_folder}, memory: {memory}, cpu: {cpu}, vram: {vram}, network: {network}, groups: {groups}")
         except Exception as e:
             Print.error("Error during VM CREATION")
             Print.error("Info:")
@@ -65,15 +66,15 @@ class VboxInterface:
 
 
     @staticmethod
-    def connectdisk(machine_name, disk_location):
+    def connectdisk(uuid, disk_location):
         try:
-            cmd = ["VBoxManage", "storagectl", machine_name,
+            cmd = ["VBoxManage", "storagectl", uuid,
             "--name", "\"SATA Controller\"",
             "--add", "sata",
             "--controller", "IntelAhci"]
             # Debug Print: print("++", cmd)
             _run(cmd, "DISK CONNECTION")
-            cmd = ["VBoxManage", "storageattach", machine_name,
+            cmd = ["VBoxManage", "storageattach", uuid,
             "--storagectl", "\"SATA Controller\"",
             "--port", "0",
             "--device", "0",
@@ -86,19 +87,19 @@ class VboxInterface:
             Print.error("Info:")
             print(e)
             sys.exit(6) #TODO: Exit Gracefully
-        Print.info(f"-- Connected disk to '{machine_name}' location: {disk_location}")
+        Print.info(f"-- Connected disk to '{uuid}' location: {disk_location}")
 
 
     @staticmethod
-    def connectboot(machine_name, boot_location):
+    def connectboot(uuid, boot_location):
         try:
-            cmd = ["VBoxManage", "storagectl", machine_name,
+            cmd = ["VBoxManage", "storagectl", uuid,
             "--name", "\"IDE Controller\"",
             "--add", "ide",
             "--controller", "PIIX4"]
             # Debug Print: print("++", cmd)
             _run(cmd, "BOOT IMAGE CONNECTION")
-            cmd = ["VBoxManage", "storageattach", machine_name,
+            cmd = ["VBoxManage", "storageattach", uuid,
             "--storagectl", "\"IDE Controller\"",
             "--port", "1",
             "--device", "0",
@@ -111,13 +112,13 @@ class VboxInterface:
             Print.error("Info:")
             print(e)
             sys.exit(6) #TODO: Exit Gracefully
-        Print.info(f"-- Connected boot image to '{machine_name}' location: {boot_location}")
+        Print.info(f"-- Connected boot image to '{uuid}' location: {boot_location}")
 
 
     @staticmethod
-    def setbootorder(machine_name, boot1="none", boot2="none", boot3="none", boot4="none"):
+    def setbootorder(uuid, boot1="none", boot2="none", boot3="none", boot4="none"):
         try:
-            cmd = ["VBoxManage", "modifyvm", machine_name,
+            cmd = ["VBoxManage", "modifyvm", uuid,
             "--boot1", boot1,
             "--boot2", boot2,
             "--boot3", boot3,
@@ -129,12 +130,12 @@ class VboxInterface:
             Print.error("Info:")
             print(e)
             sys.exit(6) #TODO: Exit Gracefully
-        Print.info(f"-- Set boot order on '{machine_name}' order: 1-{boot1}, 2-{boot2}, 3-{boot3}, 4-{boot4}")
+        Print.info(f"-- Set boot order on '{uuid}' order: 1-{boot1}, 2-{boot2}, 3-{boot3}, 4-{boot4}")
 
     @staticmethod
-    def startvm(machine_name):
+    def startvm(uuid):
         try:
-            cmd = ["VBoxManage", "startvm", machine_name,
+            cmd = ["VBoxManage", "startvm", uuid,
             "--type", "headless"]
             # Debug Print: print("++", cmd)
             _run(cmd, "VM STARTUP")
@@ -143,3 +144,28 @@ class VboxInterface:
             Print.error("Info:")
             print(e)
             sys.exit(6) #TODO: Exit Gracefully
+
+    @staticmethod
+    def getvmrunning(uuid):
+        running = VboxInterface._get_running_vms()
+        if uuid in running:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def _get_running_vms():
+        try:
+            cmd = ["VBoxManage", "list", "runningvms"]
+            response = _run(cmd, "GET RUNNING VMS")
+            machines = response.stdout.decode('utf-8').split('\n')[:-1]
+            uuids = [entry[entry.find('{')+1:entry.find('}')] for entry in machines]
+            return uuids
+        except:
+            Print.error("Error during GET RUNNING VMS")
+            Print.error("Info:")
+            print(e)
+            sys.exit(6) #TODO: Exit Gracefully
+
+
+
