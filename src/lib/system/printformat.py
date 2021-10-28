@@ -1,3 +1,4 @@
+from sys import stderr
 Colors = {
    "LBLUE" : '\033[94m',
    "LGREEN" : '\033[92m',
@@ -42,5 +43,5 @@ class Print():
 
     @classmethod
     def error(cls, msg):
-        print("Error: " + Color.paint("red", msg))
+        print("Error: " + Color.paint("red", msg), file=stderr)
     

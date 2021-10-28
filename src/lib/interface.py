@@ -56,7 +56,7 @@ class VboxInterface:
             "--size", str(size),
             "--format", "VDI"]
             # Debug Print: print("++", cmd)
-            _run(cmd, "DISK CREATION")
+            response = _run(cmd, "DISK CREATION") # TODO: return uuid of the created disk to be unregistered at purge
             Print.info(f"-- Created disk '{disk_location}' size: {size}")
         except Exception as e:
             Print.error("Error during DISK CREATION")
@@ -81,7 +81,7 @@ class VboxInterface:
             "--type", "hdd",
             "--medium", disk_location]
             # Debug Print: print("++", cmd)
-            _run(cmd, "DISK CONNECTION")
+            response = _run(cmd, "DISK CONNECTION")# TODO: return uuid of the created disk to be unregistered at purge
         except Exception as e:
             Print.error("Error during DISK CONNECTION")
             Print.error("Info:")
@@ -152,6 +152,46 @@ class VboxInterface:
             return True
         else:
             return False
+
+    @staticmethod
+    def poweroffvm(uuid):
+        try:
+            cmd = ["VBoxManage", "controlvm", uuid,
+            "poweroff"]
+            # Debug Print: print("++", cmd)
+            _run(cmd, "VM POWEROFF")
+        except Exception as e:
+            Print.error("Error during VM POWEROFF")
+            Print.error("Info:")
+            print(e)
+            sys.exit(6) #TODO: Exit Gracefully
+
+    @staticmethod
+    def acpipoweroffvm(uuid):
+        try:
+            cmd = ["VBoxManage", "controlvm", uuid,
+            "acpipowerbutton"]
+            # Debug Print: print("++", cmd)
+            _run(cmd, "VM ACPI POWEROFF")
+        except Exception as e:
+            Print.error("Error during ACPI VM POWEROFF")
+            Print.error("Info:")
+            print(e)
+            sys.exit(6) #TODO: Exit Gracefully
+
+    @staticmethod
+    def removevm(uuid, delete=False):## TODO: get the uuid of attached disk to unregister here
+        try:
+            cmd = ["VBoxManage", "unregistervm", uuid]
+            if delete:
+                cmd += ["--delete"]
+            # Debug Print: print("++", cmd)
+            _run(cmd, "VM REMOVE") 
+        except Exception as e:
+            Print.error("Error during VM REMOVE")
+            Print.error("Info:")
+            print(e)
+            sys.exit(6) #TODO: Exit Gracefully
 
     @staticmethod
     def _get_running_vms():

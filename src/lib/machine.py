@@ -1,8 +1,12 @@
 import sys, os
 import uuid
+import multiprocessing
+import time
 
 from lib.system.printformat import Print, Color
 from lib.interface import VboxInterface as interface
+
+ORC_DEFAULT_ACPI_TIMEOUT = 25
 
 class Machine:
     def __init__(self, name, vbox_name, base_folder, data, create):
@@ -11,6 +15,7 @@ class Machine:
         self.vbox_name = vbox_name
         self.uuid = data.get('uuid', None)
         self.boot_order = data.get('boot_order', None)
+        self.explicit_disk = data.get('explicit_disk', None)
         self.base_folder = base_folder
         try:
             self.os = data['os']
@@ -111,9 +116,35 @@ class Machine:
             interface.connectboot(self.uuid, self.boot['location'])
 
         self.boot_order = filter(None, self.boot_order)
+        self.boot_order = list(self.boot_order)
         
         interface.connectdisk(self.uuid, self.disk['location'])
         interface.setbootorder(self.uuid, *self.boot_order)
 
     def start_machine(self):
         interface.startvm(self.uuid)
+
+    def stop_machine(self, soft=False):
+        if self.running:
+            if soft:
+                pacpi = multiprocessing.process(target=Machine._acpipoweroff, args=(self.uuid,))
+                pacpi.start()
+
+                pacpi.join(ORC_DEFAULT_ACPI_TIMEOUT)
+                if pacpi.is_alive():
+                    Print.warning(f"ACPI Shutdown on '{self.name}' vbox_name:{self.vbox_name}:{self.uuid} Timed out. Skipping...")
+                    pacpi.kill()
+                    #p.terminate() will probably be a better choice but it has a chance of stucking which is problematic...
+
+                    pacpi.join()
+            else:
+                interface.poweroffvm(self.uuid)
+
+    def remove_machine(self):
+        if not self.running:
+            interface.removevm(self.uuid, delete=not self.explicit_disk)
+
+    @staticmethod
+    def _acpipoweroff(uuid):
+        interface.acpipoweroffvm(uuid)
+        

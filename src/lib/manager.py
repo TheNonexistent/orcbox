@@ -36,11 +36,24 @@ class OrcManager:
         ##TODO: implement functionallity so that if one machine is down the up command just brings up that one
         for machine in self._machine_list:
             machine.start_machine()
-            print("-Started: " + Color.paint("lblue", machine.name))
+            print("+ Started: " + Color.paint("lblue", machine.name))
         return [machine.__dict__ for machine in self._machine_list]
 
-    def down(self):
-        pass
+    def down(self, soft=False):
+        softstring = 'soft ' if soft else ''
+
+        for index, machine in enumerate(self._machine_list):
+            Print.info(f"Attempting {softstring}poweroff on '{machine.vbox_name}'...")
+            machine.stop_machine(soft=soft)
+            print("+ Stopped: " + Color.paint("lblue", machine.name))
+        return [machine.__dict__ for machine in self._machine_list]
+
+    def purge(self):
+        for index, machine in enumerate(self._machine_list):
+            Print.info(f"Removing '{machine.vbox_name}'...")
+            machine.remove_machine()
+            print("+ Removed: " + Color.paint("lblue", machine.name))
+            del machine
 
     def status(self):
         machines_stats = []
