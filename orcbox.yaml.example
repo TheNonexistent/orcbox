@@ -7,7 +7,7 @@ server1:
     network: "nat"
     memory: 1024
     vram: 128
-    disk: "serverimage/debian.vdi"
+    disk: "serverdisk/debian.vdi"
     groups: "orcbox"
 server2:
     os: "Ubuntu_64"
