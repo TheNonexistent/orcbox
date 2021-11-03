@@ -2,6 +2,7 @@ import string
 import random
 
 from lib.machine import Machine
+from lib.system.decorators import singleton
 from lib.system.printformat import Print, Color
 
 
@@ -10,7 +11,7 @@ _SESSION_ID_LENGTH = 10
 def _id_generator(length=_SESSION_ID_LENGTH, chars=string.ascii_lowercase + string.digits):
     return  ''.join(random.choices(chars, k=length))
 
-
+@singleton
 class OrcManager:
     def __init__(self, session_name, session_config, base_folder, session_id=None, open_session=False):
         if session_id == None:
